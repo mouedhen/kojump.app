@@ -84,7 +84,7 @@ WSGI_APPLICATION = 'kojump.wsgi.application'
 
 # Required for use with SQLite / Sptialite
 # SPATIALITE_LIBRARY_PATH = 'mod_spatialite'
-SPATIALITE_LIBRARY_PATH = "/usr/lib/mod_spatialite.so"
+SPATIALITE_LIBRARY_PATH = "/usr/lib/mod_spatialite"
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
