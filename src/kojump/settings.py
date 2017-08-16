@@ -25,7 +25,7 @@ SECRET_KEY = 'ao9vb_is8k)pw#qermz)%pj#&#52j0o&bv8+zo095h86lgsgwi'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [u'*.pythonanywhere.com', u'127.0.0.1']
 
 
 # Application definition
@@ -176,7 +176,7 @@ LOGGING = {
     },
 }
 
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-# SECURE_SSL_REDIRECT = True
-# SESSION_COOKIE_SECURE = True
-# CSRF_COOKIE_SECURE = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
