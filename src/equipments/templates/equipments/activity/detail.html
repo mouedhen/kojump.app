@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% load staticfiles i18n %}
+
+{% block title %}{{ activity.label }}{% endblock %}
+
+{% block styles %}
+    {{ block.super }}
+    <link href="{% static 'kojump/assets/mapboxjs/mapbox.css' %}" rel='stylesheet' />
+{% endblock styles %}
+
+{% block content %}
+
+    <div class="uk-inline" style="">
+        <div class="uk-cover-container" style="height: 50vh">
+            <img src="{{ activity.thumbnail.url }}" alt="{{ activity.slug }}">
+        </div>
+        <div class="uk-overlay uk-light uk-position-bottom uk-container">
+            <h1 class="uk-article-title"><a class="uk-link-reset" href="">{{ activity.label }}</a></h1>
+        </div>
+    </div>
+
+    <section class="container" style="padding-top: 30px; padding-bottom: 30px">
+        <article class="uk-article">
+            <div class="uk-container">
+                <h2>Description</h2>
+                <p class="uk-text-justify">
+                    {% if activity.description %}
+                        {{ activity.description }}
+                    {% else %}
+                        aucune description
+                    {% endif %}
+                </p>
+
+                <h3>Disciplines sportives</h3>
+                <div class="uk-margin uk-grid-small uk-child-width-auto uk-grid">
+                    {% for sport_discipline in activity.sports_disciplines.all %}
+                        <label><input class="uk-checkbox" type="checkbox" value="{{ sport_discipline.id }}">
+                            {{ sport_discipline }}
+                        </label>
+                    {% endfor %}
+                </div>
+                <button class="uk-button uk-button-default">Filtrer</button>
+            </div>
+        </article>
+    </section>
+
+    <div class="black-separator"></div>
+    <div class="equipments uk-background-muted">
+        <div class="uk-child-width-1-5 grid uk-grid-small" style="height: calc(100vh - 80px); margin-top: 0 !important;" uk-grid>
+            <div class="uk-container uk-width-3-5 uk-panel-scrollable" style="height: 100%">
+                <div class="uk-child-width-1-2@m grid uk-grid-small" id="institutions" uk-grid>
+                    <input class="uk-width-1-1 uk-input" type="text" placeholder="Filtrer">
+                </div>
+            </div>
+            <div class="uk-width-2-5" id='map' style="height: calc(100vh - 80px)"></div>
+        </div>
+    </div>
+    <div class="black-separator"></div>
+{% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script src="{% static 'kojump/assets/mapboxjs/mapbox.js' %}"></script>
+
+    <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-locatecontrol/v0.43.0/L.Control.Locate.min.js'></script>
+    <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-locatecontrol/v0.43.0/L.Control.Locate.mapbox.css' rel='stylesheet' />
+    <!--[if lt IE 9]>
+    <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-locatecontrol/v0.43.0/L.Control.Locate.ie.css' rel='stylesheet' />
+    <![endif]-->
+    <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-locatecontrol/v0.43.0/css/font-awesome.min.css' rel='stylesheet' />
+
+    <script>
+        var activity_id = window.location.href.substr(window.location.href.lastIndexOf('/') +1);
+
+        $('.activity p').shave(50);
+
+        L.mapbox.accessToken = 'pk.eyJ1IjoibW91ZWRoZW4iLCJhIjoiY2o1b25ibHdvMDFrbTJxcXRtaWttZ3VqcCJ9.D5l-yqWthlUroyn5GFoY2w';
+
+        var map = L.mapbox.map('map', 'mapbox.streets')
+            .setView([48.856638, 2.352241], 6);
+
+        var featureLayer = L.mapbox.featureLayer()
+            .loadURL('/api/activities/' + activity_id + '/institutions')
+            .addTo(map);
+
+        var renderFeature = function (feature) {
+            var item = document.createElement('div');
+            item.classList.add('activity');
+            item.innerHTML = '<div class="uk-card uk-card-default uk-card-hover">\n' +
+        '                        <div class="uk-card-media-top">\n' +
+        '                            <img src="' + feature.properties.thumbnail + '" alt="' + feature.properties.slug + '">\n' +
+        '                        </div>\n' +
+        '                        <div class="uk-card-body">\n' +
+        '                            <h3 class="uk-card-title"><a href="/institutions/'+ feature.properties.id +'" style="color:'+
+                                        feature.properties['marker-color']+' !important">'+
+                                        feature.properties.name +'</a></h3>\n' +
+        '                            <p>' + feature.properties.address + '</p>\n' +
+        '                        </div>\n' +
+        '                    </div>';
+            return item;
+        };
+
+        function onmove() {
+            var bounds = map.getBounds();
+
+            document.getElementById('institutions').innerHTML = '';
+            featureLayer.eachLayer(function(marker) {
+                if (bounds.contains(marker.getLatLng())) {
+                    document.getElementById('institutions').appendChild(renderFeature(marker.feature))
+                }
+            });
+        }
+
+        map.on('moveend', onmove);
+        featureLayer.on('ready', function(e) {
+            L.control.locate().addTo(map);
+            map.addControl(L.mapbox.geocoderControl('mapbox.places', {
+        autocomplete: true
+    }))
+            onmove();
+        });
+
+    </script>
+{% endblock %}

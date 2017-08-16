@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% load i18n %}
+
+{% block title %}{% trans 'Inscription' %}{% endblock %}
+
+{% block content %}
+    <h1>{% trans "S'inscrire" %}</h1>
+
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="reset" value="{% trans 'annuler' %}">
+        <input type="submit" value="{% trans 'valider' %}">
+    </form>
+{% endblock %}

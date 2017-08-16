@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+
+{% load staticfiles i18n %}
+
+{% block title %}Page d'accueil{% endblock %}
+
+{% block content %}
+    <header class="hero">
+
+        <div class="uk-container-expand">
+            <div class="hero-slider">
+                <div class="uk-background-cover slide"
+                     style="background-image: url('{% static 'kojump/assets/img/slides/basket2.jpg' %}');">
+                </div>
+                <div class="uk-background-cover slide"
+                     style="background-image: url('{% static 'kojump/assets/img/slides/football.jpg' %}');">
+                </div>
+                <div class="uk-background-cover slide"
+                     style="background-image: url('{% static 'kojump/assets/img/slides/golf.jpg' %}');">
+                </div>
+                <div class="uk-background-cover slide"
+                     style="background-image: url('{% static 'kojump/assets/img/slides/tennis.jpg' %}');">
+                </div>
+                <div class="uk-background-cover slide"
+                     style="background-image: url('{% static 'kojump/assets/img/slides/skate.jpeg' %}');">
+                </div>
+                <div class="uk-background-cover slide"
+                     style="background-image: url('{% static 'kojump/assets/img/slides/badminton.jpg' %}');">
+                </div>
+            </div>
+
+            <div class="uk-position-absolute" style="bottom: 17vh; right: 0; left: 0;">
+                <h1 class="uk-text-center" style="color: #f8f8f8">
+                    <i uk-icon="icon: search; ratio: 2"></i> Je cherche un terrain de
+                    <span style="color: #f8f8f8"
+                          class="txt-rotate"
+                          data-period="2000"
+                          data-rotate='[ "Basket", "Football", "Golf", "Tennis", "Skate" , "Badminton" ]'></span>
+                </h1>
+            </div>
+            <div class="uk-position-absolute" style="bottom: 5vh; right: 0; left: 0">
+                <a href="#activities" class="uk-align-center uk-button uk-width-1-2@s button-orange"
+                   uk-scroll="offset:80">
+                    <span class="uk-margin-small-right" uk-icon="icon: thumbnails"></span>
+                    Afficher toutes les activités
+                </a>
+            </div>
+
+        </div>
+    </header>
+
+    <div class="black-separator"></div>
+
+    <div class="activities uk-background-muted" id="activities">
+        <div class="uk-container">
+            <div class="uk-child-width-1-3@m uk-child-width-1-2@s grid uk-grid-small infinite-container" uk-grid>
+                <div class="uk-width-1-1">
+                    <div class="uk-margin uk-grid-small uk-child-width-auto uk-grid">
+                        <input class="uk-input search-sport-input" type="text" placeholder="Rechercher une discipline">
+                        <button class="uk-button uk-button-secondary search-sport-button">Rechercher</button>
+                    </div>
+                </div>
+                {% for activity in activities %}
+                    <div class="activity infinite-item">
+                        <div class="uk-card uk-card-default uk-card-hover">
+                            <div class="uk-card-media-top">
+                                <img src="{{ activity.thumbnail.url }}" alt="{{ activity.slug }}">
+                            </div>
+                            <div class="uk-card-body">
+                                <h3 class="uk-card-title">
+                                    <a href="{% url 'activity-detail' activity.id %}"
+                                       style="color: #ff4e00">{{ activity.label }}</a>
+                                </h3>
+                                {% if activity.description %}
+                                    {{ activity.description }}
+                                {% else %}
+                                    aucune description
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+
+
+            {% if page_obj.has_next %}
+                <div class="uk-width-1-1">
+                    <a class="infinite-more-link uk-text-center" href="{% url 'activities' page_obj.next_page_number %}"
+                       style="display: none;" uk-spinner></a>
+                </div>
+            {% endif %}
+
+            </div>
+        </div>
+    </div>
+    <div class="black-separator"></div>
+{% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+
+    <script src="{% static 'kojump/assets/vendor/waypoints/lib/jquery.waypoints.js' %}"></script>
+    <script src="{% static 'kojump/assets/vendor/waypoints/lib/shortcuts/infinite.js' %}"></script>
+    <script>
+        $('.hero-slider').slick({
+            dots: true,
+            infinite: true,
+            speed: 500,
+            slidesToShow: 1,
+            arrows: false,
+            autoplay: true,
+            autoplaySpeed: 4000,
+            fade: true,
+            cssEase: 'linear',
+            pauseOnHover: false
+        });
+        $('.activity p').shave(50);
+
+        var TxtRotate = function (el, toRotate, period) {
+            this.toRotate = toRotate;
+            this.el = el;
+            this.loopNum = 0;
+            this.period = parseInt(period, 10) || 2000;
+            this.txt = '';
+            this.tick();
+            this.isDeleting = false;
+        };
+
+        TxtRotate.prototype.tick = function () {
+            var i = this.loopNum % this.toRotate.length;
+            var fullTxt = this.toRotate[i];
+
+            if (this.isDeleting) {
+                this.txt = fullTxt.substring(0, this.txt.length - 1);
+            } else {
+                this.txt = fullTxt.substring(0, this.txt.length + 1);
+            }
+
+            this.el.innerHTML = '<span class="wrap">' + this.txt + '</span>';
+
+            var that = this;
+            var delta = 300 - Math.random() * 100;
+
+            if (this.isDeleting) {
+                delta /= 2;
+            }
+
+            if (!this.isDeleting && this.txt === fullTxt) {
+                delta = this.period;
+                this.isDeleting = true;
+            } else if (this.isDeleting && this.txt === '') {
+                this.isDeleting = false;
+                this.loopNum++;
+                delta = 500;
+            }
+
+            setTimeout(function () {
+                that.tick();
+            }, delta);
+        };
+
+        window.onload = function () {
+            var elements = document.getElementsByClassName('txt-rotate');
+            for (var i = 0; i < elements.length; i++) {
+                var toRotate = elements[i].getAttribute('data-rotate');
+                var period = elements[i].getAttribute('data-period');
+                if (toRotate) {
+                    new TxtRotate(elements[i], JSON.parse(toRotate), period);
+                }
+            }
+            // INJECT CSS
+            var css = document.createElement("style");
+            css.type = "text/css";
+            css.innerHTML = ".txt-rotate > .wrap { border-right: 0.08em solid #666 }";
+            document.body.appendChild(css);
+        };
+
+        var infinite = new Waypoint.Infinite({
+            element: $('.infinite-container')[0],
+            onBeforePageLoad: function () {
+                $('.infinite-more-link').show();
+            },
+            onAfterPageLoad: function ($items) {
+                $('.infinite-more-link').hide();
+            }
+        });
+    </script>
+{% endblock %}
