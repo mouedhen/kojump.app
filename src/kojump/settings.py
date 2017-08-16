@@ -25,7 +25,7 @@ SECRET_KEY = 'ao9vb_is8k)pw#qermz)%pj#&#52j0o&bv8+zo095h86lgsgwi'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [u'*.pythonanywhere.com', u'127.0.0.1', u'*.kojump.fr']
+ALLOWED_HOSTS = [u'kojump.pythonanywhere.com', u'127.0.0.1', u'www.kojump.fr']
 
 
 # Application definition
